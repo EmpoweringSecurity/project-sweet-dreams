@@ -1,0 +1,54 @@
+# CIS BENCHMARK RESPONSE PACK
+## CIS AWS Benchmark v1.2.0 05-23-2018
+
+| No. | Control  | Severity | Automated Response | Action |
+|---|---|---|---|---|
+| 1.1 | Avoid the use of the "root" account | Critical |  |
+| 1.2 | Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password | Medium |  |
+| 1.3 | Ensure credentials unused for 90 days or greater are disabled | Medium | Yes | A Lambda function will loop through the User's access key as identified in the finding, any keys that are over the age of 90 days will be deactivated and if successful a Note will be added to the Security Hub finding.|
+| 1.4 | Ensure access keys are rotated every 90 days or less | Medium | Yes | A Lambda function will loop through the User's access key as identified in the finding, any keys that are over the age of 90 days will be deactivated and if successful a Note will be added to the Security Hub finding. |
+| 1.5 | Ensure IAM password policy requires at least one uppercase letter | Medium | Yes | A Lambda function will call the IAM UpdateAccountPasswordPolicy API with CIS-compliant parameters for the password policy, due to the fact no inputs are expected, a note will not be added to any finding. |
+| 1.6 | Ensure IAM password policy require at least one lowercase letter | Medium | Yes | A Lambda function will call the IAM UpdateAccountPasswordPolicy API with CIS-compliant parameters for the password policy, due to the fact no inputs are expected, a note will not be added to any finding. |
+| 1.7 | Ensure IAM password policy require at least one symbol | Medium | Yes | A Lambda function will call the IAM UpdateAccountPasswordPolicy API with CIS-compliant parameters for the password policy, due to the fact no inputs are expected, a note will not be added to any finding. |
+| 1.8 | Ensure IAM password policy require at least one number | Medium | Yes | A Lambda function will call the IAM UpdateAccountPasswordPolicy API with CIS-compliant parameters for the password policy, due to the fact no inputs are expected, a note will not be added to any finding. |
+| 1.9 | Ensure IAM password policy requires minimum length of 14 or greater | Medium | Yes | A Lambda function will call the IAM UpdateAccountPasswordPolicy API with CIS-compliant parameters for the password policy, due to the fact no inputs are expected, a note will not be added to any finding. |
+| 1.10 | Ensure IAM password policy prevents password reuse | Low | Yes | A Lambda function will call the IAM UpdateAccountPasswordPolicy API with CIS-compliant parameters for the password policy, due to the fact no inputs are expected, a note will not be added to any finding. |
+| 1.11 | Ensure IAM password policy expires passwords within 90 days or less | Low | Yes | A Lambda function will call the IAM UpdateAccountPasswordPolicy API with CIS-compliant parameters for the password policy, due to the fact no inputs are expected, a note will not be added to any finding. |
+| 1.12 | Ensure no root account access key exists | Critical |  |
+| 1.13 | Ensure MFA is enabled for the "root" account | Critical |  |
+| 1.14 | Ensure hardware MFA is enabled for the "root" account | Critical |  |
+| 1.15 | Ensure security questions are registered in the AWS account | Not In SecHub |  |
+| 1.16 | Ensure IAM policies are attached only to groups or roles | Low |  |
+| 1.17 | Maintain current contact details | Not In SecHub |  |
+| 1.18 | Ensure security contact information is registered | Not In SecHub |  |
+| 1.19 | Ensure IAM instance roles are used for AWS resource access from instances | Not In SecHub |  |
+| 1.20 | Ensure a support role has been created to manage incidents with AWS Support | Low |  |
+| 1.21 | Do not setup access keys during initial user setup for all IAM users that have a console password | Not In SecHub |  |
+| 1.22 | Ensure IAM policies that allow full "*:*" administrative privileges are not create | Critical |  |
+| 2.1 | Ensure CloudTrail is enabled in all regions | Critical |  |
+| 2.2 | Ensure CloudTrail log file validation is enabled | Low | Yes | A Lambda function will parse out the CloudTrail information from the finding and call the UpdateTrail API to turn log file validation back on, if successful a Note will be added to the Security Hub finding. |
+| 2.3 | Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible | Critical | Yes | A Lambda function will parse out the S3 Bucket information from the finding and calls the Systems Manager StartAutomationExecution API to run the Automation document `AWS-DisableS3BucketPublicReadWrite` to remove public Read & Write access from the bucket. You will need to follow-up in the Automation console, if the automation is executed successfully a Note will be added to the Security Hub finding. |
+| 2.4 | Ensure CloudTrail trails are integrated with CloudWatch Logs | Low | Yes | To automatically ensure your CloudTrail logs are sent to CloudWatch, the Lambda function for this playbook will create a brand new CloudWatch Logs group that has the name of the non-compliant CloudTrail trail in it for easy identification. The Lambda function will programmatically update your non-compliant CloudTrail trail to send its logs to the newly created log group.  To accomplish this, CloudTrail needs an IAM role and permissions to be allowed to publish logs to CloudWatch. To avoid creating multiple new IAM roles and policies via Lambda, you’ll populate the ARN of this IAM role in the Lambda environmental variables for this playbook. If successful a Note will be added to the Security Hub finding. |
+| 2.5 | Ensure AWS Config is enabled | Medium |  |
+| 2.6 | Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket | Low | Yes | To ensure the S3 bucket that contains your CloudTrail logs has access logging enabled, the Lambda function for this playbook invokes the Systems Manager document `AWS-ConfigureS3BucketLogging` this document will enable access logging for that bucket. To avoid statically populating your S3 access logging bucket in the Lambda function’s code, you’ll pass that value in via an environmental variable. You will need to follow-up in the Automation console, if the automation is executed successfully a Note will be added to the Security Hub finding. |
+| 2.7 | Ensure CloudTrail logs are encrypted at rest using KMS CMKs | Medium | Yes | You’ll achieve automated remediation by using a Lambda function to create a new KMS CMK and alias which identifies the non-compliant CloudTrail trail. You’ll then attach a KMS key policy that only allows the AWS account that owns the trail to decrypt the logs by using the IAM condition for StringEquals: kms:CallerAccount. You only need to run this playbook once per non-compliant CloudTrail trail. |
+| 2.8 | Ensure rotation for customer created CMKs is enabled | High | Yes | A Lambda function will parse out the KMS CMK infromation from the finding and call the KMS EnableKeyRotation API to enable rotation and if successful a Note will be added to the Security Hub finding. |
+| 2.9 | Ensure VPC flow logging is enabled in all VPCs | Medium | Yes | To enable VPC flow logging for rejected packets, the Lambda function for this playbook will create a new CloudWatch Logs group. For easy identification, the name of the group will include the non-compliant VPC name. The Lambda function will programmatically update your VPC to enable flow logs to be sent to the newly created log group. Similar to CloudTrail logging, VPC flow log need an IAM role and permissions to be allowed to publish logs to CloudWatch. To avoid creating multiple new IAM roles and policies via Lambda, you’ll populate the ARN of this IAM role in the Lambda environmental variables for this playbook, and if successful a Note will be added to the Security Hub finding. |
+| 3.1 | Ensure a log metric filter and alarm exist for unauthorized API calls | Medium | |
+| 3.2 | Ensure a log metric filter and alarm exist for Management Console sign-in without MFA | Medium | |
+| 3.3 | Ensure a log metric filter and alarm exist for usage of "root" account | Medium | |
+| 3.4 | Ensure a log metric filter and alarm exist for IAM policy changes | Medium | |
+| 3.5 | Ensure a log metric filter and alarm exist for CloudTrail configuration changes | Medium | |
+| 3.6 | Ensure a log metric filter and alarm exist for AWS Management Console authentication failures | Medium | |
+| 3.7 | Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs | Medium | |
+| 3.8 | Ensure a log metric filter and alarm exist for S3 bucket policy changes | Medium | |
+| 3.9 | Ensure a log metric filter and alarm exist for AWS Config configuration changes | Medium | |
+| 3.10 | Ensure a log metric filter and alarm exist for security group changes | Medium | |
+| 3.11 | Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) | Medium | |
+| 3.12 | Ensure a log metric filter and alarm exist for changes to network gateways | Medium | |
+| 3.13 | Ensure a log metric filter and alarm exist for route table changes | Medium | |
+| 3.14 | Ensure a log metric filter and alarm exist for VPC changes | Medium | |
+| 4.1 | Ensure no security groups allow ingress from 0.0.0.0/0 to port 22 | High | Yes | A Lambda function will parse out the Security Group information from the finding and calls the Systems Manager StartAutomationExecution API to run the Automation document `AWS-DisablePublicAccessForSecurityGroup` to remove 0.0.0.0/0 rules from the Security Group. You will need to follow-up in the Automation console, if the automation is executed successfully a Note will be added to the Security Hub finding. |
+| 4.2 | Ensure no security groups allow ingress from 0.0.0.0/0 to port 3389 | High | Yes | A Lambda function will parse out the Security Group information from the finding and calls the Systems Manager StartAutomationExecution API to run the Automation document `AWS-DisablePublicAccessForSecurityGroup` to remove 0.0.0.0/0 rules from the Security Group. You will need to follow-up in the Automation console, if the automation is executed successfully a Note will be added to the Security Hub finding. |
+| 4.3 | Ensure the default security group of every VPC restricts all traffic | Medium | Yes | A Lambda function will parse out the Security Group information from the finding and use an EC2 resource to iterate through ingress and egress IP permissions and then revoke them if they exist. If any rules were removed from the default security group a Note will be added reflecting this. This playbook should technically work on other Security Group findings if their Group ID is provided in `Resource.Details.Other` within the ASFF. |
+| 4.4 | Ensure routing tables for VPC peering are "least access" | Not In SecHub | |

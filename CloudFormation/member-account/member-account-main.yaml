@@ -1,0 +1,316 @@
+ # Copyright 2020 Stefan Prioriello
+ # SPDX-License-Identifier: MIT
+ #
+ # Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+ # software and associated documentation files (the "Software"), to deal in the Software 
+ # without restriction, including without limitation the rights to use, copy, modify, 
+ # merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
+ # permit persons to whom the Software is furnished to do so, subject to the following 
+ # conditions:
+ #
+ # The above copyright notice and this permission notice shall be included in all 
+ # copies or substantial portions of the Software.
+ #
+ # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ # INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ # PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: This member stack will create the supporting infrastructure for target accounts for deploying the solution.
+
+Parameters:
+  SecurityAccountId:
+    Type: String
+    Description: Security Account Id, like 012345678912
+    Default: "012345678912"
+
+  LambdaResponseRoleNamePrefix:
+    Type: String
+    Description: Prefix for the role to be assumed in the target account for incident response(IR)
+    Default: automated-response-ir
+
+Resources:
+  ##CIS BENCHMARK RESPONSE PACK
+  #CIS Target Lambda Roles
+  CIS13RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS13-14RR"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"   
+      Policies:
+      - PolicyName: CIS-1-3-4-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - iam:UpdateAccessKey
+            - iam:ListAccessKeys
+            Resource: '*'
+
+  CIS15to111RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS1-5-11RR"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-1-5-11-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - iam:UpdateAccountPasswordPolicy
+            Resource: '*'
+
+  CIS22RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS2-2RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-2-2-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - cloudtrail:UpdateTrail
+            Resource: '*'
+
+  CIS23RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS2-3RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-2-3-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - ssm:StartAutomationExecution
+            - s3:GetBucketAcl
+            - s3:GetBucketPolicy
+            - s3:PutBucketAcl
+            - s3:PutBucketPolicy
+            - s3:PutBucketPublicAccessBlock
+            - iam:PassRole
+            Resource: '*'
+
+  CIS24RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS2-4RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-2-4-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:DescribeLogGroups
+            - iam:PassRole
+            Resource: '*'
+            Effect: Allow
+          - Action:
+            - cloudtrail:UpdateTrail
+            Resource: '*'
+            Effect: Allow
+            
+  CIS26RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS2-6RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-2-6-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - ssm:StartAutomationExecution
+            - s3:PutBucketLogging
+            - iam:PassRole
+            Resource: '*'
+
+  CIS27RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS2-7RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-2-7-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:CreateAlias
+            - kms:CreateKey
+            - kms:PutKeyPolicy
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - cloudtrail:UpdateTrail
+            Resource: '*'
+
+  CIS28RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS2-8RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-2-8-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:EnableKeyRotation
+            - kms:GetKeyRotationStatus
+            Resource: '*'
+
+  CIS29RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS2-9RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-2-9-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - ec2:CreateFlowLogs
+            - ec2:DescribeFlowLogs
+            - iam:PassRole
+            Resource: '*'
+
+  CIS412RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS4-1-2RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-4-1-2-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - ssm:StartAutomationExecution
+            - ec2:DescribeSecurityGroupReferences
+            - ec2:DescribeSecurityGroups
+            - ec2:UpdateSecurityGroupRuleDescriptionsEgress
+            - ec2:UpdateSecurityGroupRuleDescriptionsIngress
+            - ec2:RevokeSecurityGroupIngress
+            - ec2:RevokeSecurityGroupEgress
+            - iam:PassRole
+            Resource: '*'
+
+  CIS43RRLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${LambdaResponseRoleNamePrefix}_CIS4-3RR"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            AWS: 
+              - !Sub "arn:aws:iam::${SecurityAccountId}:root"
+          Action: "sts:AssumeRole"
+      Policies:
+      - PolicyName: CIS-4-3-LambdaPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - ec2:DescribeSecurityGroupReferences
+            - ec2:DescribeSecurityGroups
+            - ec2:UpdateSecurityGroupRuleDescriptionsEgress
+            - ec2:UpdateSecurityGroupRuleDescriptionsIngress
+            - ec2:RevokeSecurityGroupIngress
+            - ec2:RevokeSecurityGroupEgress
+            Resource: '*'         
